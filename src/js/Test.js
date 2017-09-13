@@ -4,25 +4,11 @@ export default class ShowMoreLess extends Component {
     constructor(props) {
         super(props);
 
-        const numberUserElement = props.howManyElementShow;
-
-
         this.state = {
-            elements: [
-                {"title": "Title 1", "checkbox": "TV"},
-                {"title": "Title 2", "checkbox": "TV"},
-                {"title": "Title 3", "checkbox": "TV"},
-                {"title": "Title", "checkbox": "TV"},
-                {"title": "Title", "checkbox": "TV"},
-                {"title": "Title", "checkbox": "TV"},
-                {"title": "Title", "checkbox": "TV"},
-            ],
-
-            showElements: numberUserElement || 3
+            elements: [],
+            isShow: true,
+            showLines: this.props.showLines,
         };
-
-
-        console.log(this.state.elements);
 
         this.showMore = this.showMore.bind(this);
         this.createList = this.createList.bind(this);
@@ -31,19 +17,34 @@ export default class ShowMoreLess extends Component {
     }
 
 
-    showMore() {
+    //@TODO Check destructarization in ES6
+    // this.props.elements
+    // elements: this.props.elemnts
 
-        this.state.showElements === 3 ? (
-            this.setState({showElements: this.state.elements.length})
-        ) : (
-            this.setState({showElements: 3 })
-        )
+
+    componentWillMount() {
+        const { elements } = this.props;
+        if (elements) {
+            this.setState({ elements });
+        }
+    }
+
+    showMore() {
+        const { isShow, elements, showLines } = this.state;
+
+        if (showLines > elements.length) return;
+
+        if (isShow) {
+            return this.setState({showLines: elements.length, isShow: false })
+        }
+
+        return this.setState({showLines: this.props.showLines, isShow: true })
     }
 
     createList() {
-        const { elements, showElements } = this.state;
+        const { elements, showLines } = this.state;
 
-        return elements.slice(0, showElements).map((element, i) => {
+        return elements.slice(0, showLines).map((element, i) => {
             return (
                 <li key={i}>{element.title} - {element.checkbox}</li>
             )
@@ -51,14 +52,32 @@ export default class ShowMoreLess extends Component {
     }
 
     renderBtnName() {
-        if (this.state.showElements > 3) {
-            return <span>Show less</span>
+        const { isShow, elements, showLines } = this.state;
+
+        if (showLines > elements.length) return <div></div>;
+
+        if (isShow) {
+            return (
+                <a
+                    className="btn btn-primary"
+                    onClick={this.showMore}>
+                    Show more
+                </a>
+            )
         }
-        return <span>Show more</span>
+
+        return(
+            <a
+                className="btn btn-primary"
+                onClick={this.showMore}>
+                Show less
+            </a>
+        );
     }
 
 
     render() {
+        console.log(this.state);
         return (
             <div className="container">
                 <div className="row">
@@ -66,11 +85,7 @@ export default class ShowMoreLess extends Component {
                     <ul>
                         {this.createList()}
                     </ul>
-                    <p>
-                        <a className="btn btn-primary" onClick={this.showMore}>
-                            {this.renderBtnName()}
-                        </a>
-                    </p>
+                    {this.renderBtnName()}
                 </div>
             </div>
         )
